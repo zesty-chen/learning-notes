@@ -57,9 +57,21 @@
       "tags": [
         "数据集"
       ],
-      "content": "",
+      "content": "涵盖大部分数据，可以下载使用",
       "url": "https://www.geodata.cn/main/",
-      "updatedAt": "2026-09-29T08:00:54.466Z"
+      "updatedAt": "2026-09-29T08:04:21.734Z"
+    },
+    {
+      "id": "b8d5ad61-dd05-4b8a-a548-f1e71abfcdbc",
+      "type": "link",
+      "title": "滴滴数据集",
+      "date": "2026-09-29",
+      "tags": [
+        "数据集"
+      ],
+      "content": "一个大规模合成网约车时序数据集，包含 200 个区域内连续4年的数据，时间粒度为30分钟，涵盖三种受外生因素影响的代表性网约车场景：天气扰动、节假日效应和大型活动。\n> 对交通流量好像没啥帮助",
+      "url": "https://outreach.didichuxing.com/opendata/datasets",
+      "updatedAt": "2026-09-29T08:04:02.777Z"
     }
   ]
 }
