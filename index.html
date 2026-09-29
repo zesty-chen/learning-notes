@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="拾页 · 记录学习笔记、日常思考与值得再读的文章。">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>拾页 · 我的学习博客</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
+</head>
+<body>
+ <aside class="sidebar">
+  <a class="brand" href="./"><span class="brand-mark">拾</span><span>拾页<small>LEARN · WRITE · GROW</small></span></a>
+  <p class="nav-caption">我的知识花园</p>
+  <nav aria-label="内容分类">
+   <button class="nav active" data-filter="all"><span>▦</span>全部记录<b id="count-all">0</b></button>
+   <button class="nav" data-filter="note"><span>▤</span>学习笔记<b id="count-note">0</b></button>
+   <button class="nav" data-filter="journal"><span>◷</span>日常日志<b id="count-journal">0</b></button>
+   <button class="nav" data-filter="link"><span>↗</span>文章收藏<b id="count-link">0</b></button>
+  </nav>
+  <div class="sidebar-bottom"><div class="little-book">每一页，都是一点进步。<span>把学过的，变成自己的。</span></div><button id="settings-open" class="quiet">⚙ 博客设置与发布</button><span class="sidebar-foot">拾页 / PERSONAL NOTEBOOK</span></div>
+ </aside>
+ <div class="workspace">
+  <header class="topbar"><span>我的学习博客 <span class="slash">/</span> <span id="breadcrumb">全部记录</span></span><button id="sync-open" class="status">本机草稿模式</button></header>
+  <main>
+   <section class="intro"><div><p class="eyebrow">A LITTLE MORE, EVERY DAY</p><h1>记录，让思考有迹可循<span>。</span></h1><p class="subtitle">学习的片段，生活的灵感，还有那些值得再读的文章。</p></div><div class="date-stamp"><span id="today-month"></span><strong id="today-day"></strong><span id="today-week"></span></div></section>
+   <section class="actions" aria-label="新建内容"><button id="new-note" class="primary">＋ 写笔记</button><button id="new-journal">◷ 写日志</button><button id="new-link">↗ 收藏文章</button><button id="import-open" class="upload">↑ 上传笔记</button><input id="file-input" type="file" accept=".md,.markdown,.txt" multiple hidden></section>
+   <section class="collection"><div class="collection-heading"><div><h2 id="section-title">全部记录</h2><span id="result-count"></span></div><label class="search"><span>⌕</span><input id="search" type="search" placeholder="搜索标题、内容或标签" aria-label="搜索笔记"></label></div><div class="filterbar"><div id="tag-filters" class="tags"></div><label class="sort-label">排序 <select id="sort" aria-label="记录排序"><option value="new">最近更新</option><option value="old">最早记录</option><option value="title">标题顺序</option></select></label></div><div id="loading" role="status">正在打开你的笔记本…</div><div id="entries" class="entries"></div><div id="empty" class="empty" hidden><span>▤</span><h3>这里，留给下一次灵感</h3><p>写下第一篇笔记，或收藏一篇值得再读的文章。</p><button id="empty-new" class="primary">写下第一笔</button></div></section>
+   <footer><span>慢慢积累，自有回响。</span><span id="footer-count">拾页 · 我的学习博客</span></footer>
+  </main>
+ </div>
+ <dialog id="editor"><form id="editor-form"><div class="dialog-heading"><div><p class="eyebrow">CAPTURE A THOUGHT</p><h2 id="editor-heading">写一篇笔记</h2></div><button type="button" class="icon close" aria-label="关闭编辑器">×</button></div><div class="form-row"><label>类型<select id="entry-type"><option value="note">学习笔记</option><option value="journal">日常日志</option><option value="link">文章收藏</option></select></label><label>日期<input id="entry-date" type="date" required></label></div><label>标题<input id="entry-title" maxlength="160" placeholder="给这段思考起一个名字" required></label><label id="url-field" hidden>文章链接<input id="entry-url" type="url" placeholder="https://…"></label><label>标签 <small>用逗号分隔，最多 8 个</small><input id="entry-tags" maxlength="180" placeholder="例如：读书，编程，生活"></label><label>内容 <small>支持标题、列表、引用、代码块和链接</small><textarea id="entry-content" rows="12" maxlength="200000" placeholder="今天学到了什么？写下来吧。"></textarea></label><p id="editor-message" class="inline-message" role="status"></p><div class="dialog-footer"><span>草稿仅保存在当前浏览器</span><button type="submit" class="primary">保存草稿</button></div></form></dialog>
+ <dialog id="reader"><div class="dialog-heading"><span id="reader-kind" class="pill"></span><button class="icon close" aria-label="关闭阅读">×</button></div><h1 id="reader-title"></h1><p id="reader-meta" class="muted"></p><div id="reader-tags" class="tags"></div><div id="reader-body" class="prose"></div><a id="reader-url" class="external" target="_blank" rel="noopener noreferrer" hidden>打开原文 ↗</a><div class="dialog-footer"><button id="delete-entry" class="danger">删除记录</button><div><button id="edit-entry">编辑</button><button id="publish-entry" class="primary">公开发布</button></div></div></dialog>
+ <dialog id="settings"><form id="settings-form"><div class="dialog-heading"><div><p class="eyebrow">YOUR NOTEBOOK, EVERYWHERE</p><h2>博客设置与发布</h2></div><button type="button" class="icon close" aria-label="关闭设置">×</button></div><p class="help">连接博客仓库后，发布的内容可在手机和其他电脑上查看。访客可以阅读，只有持有仓库写入权限的人可以发布。</p><div class="form-row"><label>GitHub 用户名<input id="gh-owner" autocomplete="off" required placeholder="你的 GitHub 用户名" pattern="[A-Za-z0-9-]+"></label><label>博客仓库名称<input id="gh-repo" autocomplete="off" required placeholder="learning-notes" pattern="[A-Za-z0-9_.-]+"></label></div><label>分支<input id="gh-branch" value="main" required></label><label>GitHub 访问令牌 <small>仅保留在当前页面内存中，刷新即清除</small><input id="gh-token" type="password" autocomplete="off" placeholder="仅发布时需要，不要发到聊天中"></label><details><summary>如何取得发布权限？</summary><p>在 GitHub 的 Settings → Developer settings → Personal access tokens → Fine-grained tokens 中创建令牌；仅选择此博客仓库，授予 Contents 的 Read and write 权限，并设置有效期。将令牌填到上方输入框。不要将令牌写入任何笔记或源代码。</p></details><div class="notice">这是公开博客：发布的文字和链接会写入 GitHub 仓库；删除后的历史版本仍可能存在于 Git 历史中。</div><p id="settings-message" class="inline-message" role="status"></p><div class="dialog-footer"><button id="disconnect" type="button">清除发布权限</button><button type="submit" class="primary">保存设置并连接</button></div></form><div class="backup"><h3>备份与恢复</h3><p>导出包括公开内容和本机草稿，不包含访问令牌。</p><button id="export-data">导出备份</button><button id="import-data">导入备份</button><input id="backup-input" type="file" accept=".json" hidden><button id="publish-all" class="primary">发布所有草稿</button></div></dialog>
+ <dialog id="confirm"><h2 id="confirm-title">确认操作</h2><p id="confirm-text"></p><div class="dialog-footer"><button id="confirm-no">取消</button><button id="confirm-yes" class="primary">确认</button></div></dialog>
+ <div id="toast" role="status" hidden></div>
+ <script type="module" src="./app.js"></script>
+</body></html>
