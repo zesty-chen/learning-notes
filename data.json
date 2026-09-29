@@ -39,15 +39,15 @@
     },
     {
       "id": "246732ec-1308-4fa8-b3ca-2e147f58a58d",
-      "type": "note",
+      "type": "link",
       "title": "轮胎磨损颗粒的时空动态揭示了中国道路 网络中加剧的排放不平等",
       "date": "2026-09-29",
       "tags": [
-        "交通流量"
+        "TWPs相关"
       ],
-      "content": "https://www.nature.com/articles/s41467-026-77475-3\n有关于轮胎磨损颗粒物质污染的学习，发表于nature communications。",
-      "url": "",
-      "updatedAt": "2026-09-29T07:43:05.907Z"
+      "content": "有关于轮胎磨损颗粒物质污染的学习，发表于nature communications。",
+      "url": "https://www.nature.com/articles/s41467-026-77475-3",
+      "updatedAt": "2026-09-29T07:53:43.136Z"
     }
   ]
 }
