@@ -78,12 +78,24 @@
       "type": "link",
       "title": "国家基础学科公共科学数据中心",
       "date": "2026-09-29",
+      "content": "> 开源数据集",
+      "url": "https://www.nbsdc.cn/",
       "tags": [
         "数据集"
       ],
-      "content": "> 开源数据集",
-      "url": "https://www.nbsdc.cn/",
       "updatedAt": "2026-09-29T13:09:47.283Z"
+    },
+    {
+      "id": "00235f33-5e22-4949-b1fc-a75663a60ef2",
+      "type": "link",
+      "title": "findata 数据搜索引擎",
+      "date": "2026-09-29",
+      "tags": [
+        "数据集"
+      ],
+      "content": "> 一个可以搜索到想要的数据的引擎，类似于Google",
+      "url": "https://www.findata.cn/",
+      "updatedAt": "2026-09-29T13:36:14.457Z"
     }
   ]
 }
