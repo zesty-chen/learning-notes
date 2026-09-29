@@ -90,12 +90,24 @@
       "type": "link",
       "title": "findata 数据搜索引擎",
       "date": "2026-09-29",
+      "content": "> 一个可以搜索到想要的数据的引擎，类似于Google",
+      "url": "https://www.findata.cn/",
       "tags": [
         "数据集"
       ],
-      "content": "> 一个可以搜索到想要的数据的引擎，类似于Google",
-      "url": "https://www.findata.cn/",
       "updatedAt": "2026-09-29T13:36:14.457Z"
+    },
+    {
+      "id": "e4605790-a862-4b4c-a54f-f9d9f33ae5de",
+      "type": "link",
+      "title": "遇见数据集搜索引擎",
+      "date": "2026-09-29",
+      "tags": [
+        "数据集"
+      ],
+      "content": "> 有一个比较好的功能，不仅能返回数据集，还有企业和机构",
+      "url": "https://www.selectdataset.com/",
+      "updatedAt": "2026-09-29T13:51:38.769Z"
     }
   ]
 }
