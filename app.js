@@ -32,7 +32,52 @@ function typeChanged() { const link=$('#entry-type').value==='link';$('#url-fiel
 function putDraft(entry) { const base=drafts[entry.id]?.base ?? remote.find(e=>e.id===entry.id) ?? null; persist({...drafts,[entry.id]:{entry,base}}); }
 async function api(path,options={}) { const headers={'Accept':'application/vnd.github+json',...options.headers};if(token)headers.Authorization='Bearer '+token;let response;try{response=await fetch('https://api.github.com'+path,{...options,headers,cache:'no-store',signal:AbortSignal.timeout(12000)});}catch{throw new Error('无法连接 GitHub，请检查网络。草稿仍保存在本机。');}if(!response.ok){const messages={401:'访问令牌无效或已过期，请在设置中重新填写。',403:'没有写入权限或 API 请求过于频繁，请检查令牌权限后重试。',404:'未找到仓库或 data.json，请检查用户名、仓库名称和分支。',409:'其他设备刚刚更新了仓库。请重新尝试发布以检查冲突。',422:'GitHub 未接受此次保存，请检查分支和仓库设置。'};throw new Error(messages[response.status]||`GitHub 请求失败（${response.status}），草稿尚未发布。`);}return response; }
 const repoPath=()=>`/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/data.json`;
-async function loadCloud() { const res=await api(repoPath()+'?ref='+encodeURIComponent(config.branch),{headers:{Accept:'application/vnd.github.raw+json'}});return normalize(await res.json()); }
+// Reading and publishing use the same decoder. A missing inline body is not a size error.
+const CLOUD_READ_ERROR = 'GitHub 返回的文件数据不完整或格式异常。本机草稿已保留，请稍后重试。';
+function cloudReadPath(format) {
+ return repoPath()+'?ref='+encodeURIComponent(config.branch)+'&_shiye='+format+'-'+crypto.randomUUID();
+}
+async function readCloudJSON(response) {
+ const bytes=new Uint8Array(await response.arrayBuffer());
+ try { return {bytes,data:JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes))}; }
+ catch { throw new Error(CLOUD_READ_ERROR); }
+}
+async function gitBlobSha(bytes) {
+ const header=new TextEncoder().encode('blob '+bytes.byteLength+'\0');
+ const blob=new Uint8Array(header.length+bytes.length);
+ blob.set(header);blob.set(bytes,header.length);
+ const digest=await crypto.subtle.digest('SHA-1',blob);
+ return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function decodeCloudFile(payload) {
+ const {data}=payload;
+ if(data?.version===1&&Array.isArray(data.entries)) {
+   // Preserve the exact UTF-8 bytes, including BOM/newlines, for Git's concurrency check.
+   return {entries:normalize(data),sha:await gitBlobSha(payload.bytes)};
+ }
+ if(!data||Array.isArray(data)||! /^[a-f0-9]{40}$/i.test(data.sha||'')) throw new Error(CLOUD_READ_ERROR);
+ if(data.encoding!=='base64'||typeof data.content!=='string'||!data.content.trim()) return null;
+ let bytes,parsed;
+ try {
+   bytes=Uint8Array.from(atob(data.content.replace(/\s/g,'')),c=>c.charCodeAt(0));
+   parsed=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+ } catch { throw new Error(CLOUD_READ_ERROR); }
+ const sha=await gitBlobSha(bytes);
+ if(sha!==data.sha.toLowerCase()) throw new Error('GitHub 返回的正文与文件版本不一致。本机草稿已保留，请重试。');
+ return {entries:normalize(parsed),sha};
+}
+async function readCloudSnapshot() {
+ const payload=await readCloudJSON(await api(cloudReadPath('object'),{headers:{Accept:'application/vnd.github.object+json'}}));
+ const snapshot=await decodeCloudFile(payload);
+ if(snapshot) return snapshot;
+ // GitHub can omit inline content. Read the body separately and verify the same blob version.
+ const raw=await readCloudJSON(await api(cloudReadPath('raw'),{headers:{Accept:'application/vnd.github.raw+json'}}));
+ const fallback=await decodeCloudFile(raw);
+ if(!fallback) throw new Error(CLOUD_READ_ERROR);
+ if(fallback.sha!==payload.data.sha.toLowerCase()) throw new Error('读取期间云端内容已更新。本机草稿已保留，请重新发布。');
+ return fallback;
+}
+async function loadCloud() { return (await readCloudSnapshot()).entries; }
 function encode(text) { const bytes=new TextEncoder().encode(text);let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s); }
 function sameEntry(a,b) { return a===null||b===null?a===b:JSON.stringify(normalize({version:1,entries:[a]})[0])===JSON.stringify(normalize({version:1,entries:[b]})[0]); }
 function decode(text) { return new TextDecoder().decode(Uint8Array.from(atob(text.replace(/\s/g,'')),c=>c.charCodeAt(0))); }
@@ -42,12 +87,12 @@ async function publish(ids) {
  if(!await confirmAction('公开发布',`将 ${changes.length} 项修改发布到 ${config.owner}/${config.repo}。发布内容可以被所有人阅读。`))return;
  busy=true;document.querySelectorAll('#publish-all,#publish-entry').forEach(b=>b.disabled=true);
  const batch=JSON.parse(JSON.stringify(Object.fromEntries(changes.map(id=>[id,drafts[id]]))));
- try { const meta=await(await api(repoPath()+'?ref='+encodeURIComponent(config.branch))).json(); let fresh;
-   if(meta.encoding==='base64'&&meta.content)fresh=normalize(JSON.parse(decode(meta.content)));else throw new Error('内容文件已超过单次安全发布大小，请导出备份并拆分内容后再发布。');
+ try { const {entries:fresh,sha}=await readCloudSnapshot();
    const map=new Map(fresh.map(e=>[e.id,e]));
    for(const id of changes){const d=batch[id],server=map.get(id)||null;if(!sameEntry(server,d.base)){throw new Error(`「${d.entry?.title||d.base?.title||id}」已在其他设备修改。请导出备份，刷新后核对内容；为避免覆盖，本次未发布。`);}if(d.deleted)map.delete(id);else map.set(id,d.entry);}
-   const next={version:1,entries:[...map.values()]},content=JSON.stringify(next,null,2);if(new Blob([content]).size>900000)throw new Error('公开内容已接近 900 KB，请拆分或精简笔记后再发布。');
-   await api(repoPath(),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'更新拾页学习记录',branch:config.branch,sha:meta.sha,content:encode(content)})});
+   const next={version:1,entries:[...map.values()]},content=JSON.stringify(next,null,2),size=new Blob([content]).size;
+   if(size>900000)throw new Error(`全部公开内容合计 ${(size/1000).toFixed(1)} KB，超过本博客 900 KB 的发布上限。本机草稿已保留；把同样的内容拆成多篇不会减少总量。`);
+   await api(repoPath(),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'更新拾页学习记录',branch:config.branch,sha,content:encode(content)})});
    remote=next.entries;const remaining={...drafts};changes.forEach(id=>{if(JSON.stringify(remaining[id])===JSON.stringify(batch[id]))delete remaining[id];else if(remaining[id])remaining[id]={...remaining[id],base:map.get(id)||null};});persist(remaining);render();if($('#reader').open&&currentId)read(currentId);toast('已发布到 GitHub。其他设备刷新页面即可查看。');
  }catch(err){toast(err.message);$('#settings-message').textContent=err.message;}finally{busy=false;document.querySelectorAll('#publish-all,#publish-entry').forEach(b=>b.disabled=false);}
 }
