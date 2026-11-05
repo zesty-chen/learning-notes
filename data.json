@@ -138,12 +138,24 @@
       "type": "link",
       "title": "国家统计局",
       "date": "2026-10-28",
+      "content": "",
+      "url": "https://data.stats.gov.cn/dg/website/page.html#/pc/national/fsYearData",
+      "tags": [
+        "数据集"
+      ],
+      "updatedAt": "2026-10-28T07:17:53.212Z"
+    },
+    {
+      "id": "9289fea2-96ab-451a-a223-9df1c052678d",
+      "type": "link",
+      "title": "城市道路数据集-OpenITS",
+      "date": "2026-11-05",
       "tags": [
         "数据集"
       ],
       "content": "",
-      "url": "https://data.stats.gov.cn/dg/website/page.html#/pc/national/fsYearData",
-      "updatedAt": "2026-10-28T07:17:53.212Z"
+      "url": "https://www.openits.cn/cat-msxjtnjo",
+      "updatedAt": "2026-11-05T13:08:55.963Z"
     }
   ]
 }
